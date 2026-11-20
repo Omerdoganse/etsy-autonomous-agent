@@ -1,0 +1,10 @@
+ETSY OTONOM DIJITAL URUN FABRIKASI
+==================================
+1) Baslat.bat dosyasina cift tikla. Ilk acilista paketler kurulur (2-5 dk), sonra kontrol paneli acilir.
+2) Ayarlar & API sekmesine Replicate API anahtarini gir, Kaydet.
+3) "Etsy Oturumu Ac" ile bir kez Etsy'ye giris yap.
+4) "Test Uretimi (Dry-Run)" ile ucretsiz bir paket uret, Urunler sekmesinden kontrol et.
+5) "Otonom Uretimi Baslat" -> varsayilan olarak Etsy'ye TASLAK kaydeder (Ayarlar'dan "Direkt Yayinla" acilabilir).
+
+Kendi gercek mockup fotograflarini data\base_mockups\ icine koyup mockups.json'a ekleyebilirsin.
+Terminal komutlari (istege bagli): npm run dry-run | npm start | npm run login | npm run auth

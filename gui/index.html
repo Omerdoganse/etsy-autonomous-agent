@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self' data:" />
+  <title>Etsy Otonom Dijital Ürün Fabrikası</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- ===== Yan menü ===== -->
+    <aside class="side">
+      <div class="brand">
+        <img src="icon.png" alt="" class="brand-ico" />
+        <div class="brand-t">Etsy Fabrika</div>
+      </div>
+      <nav class="nav">
+        <button class="nav-i active" data-tab="dashboard">Ana sayfa</button>
+        <button class="nav-i" data-tab="products">Ürünler <span id="navReview" class="nav-badge hidden">0</span></button>
+        <button class="nav-i" data-tab="schedule">Zamanlayıcı <span id="navSched" class="nav-dot hidden"></span></button>
+        <button class="nav-i" data-tab="pricing">Fiyat &amp; İndirim</button>
+        <button class="nav-i" data-tab="activity">Kayıtlar</button>
+        <button class="nav-i" data-tab="settings">Ayarlar</button>
+      </nav>
+      <div class="side-foot">
+        <div class="engine"><span id="statusDot" class="dot"></span><span id="statusText">Başlatılıyor…</span></div>
+        <div id="sideNext" class="side-next">Zamanlayıcı kapalı</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- ================= ANA SAYFA ================= -->
+      <section id="tab-dashboard" class="tab">
+        <header class="page-h">
+          <div>
+            <h1>Ana sayfa</h1>
+            <p class="muted small"><span id="modeInfo">–</span> · <span id="publishInfo">–</span> · <span id="modelInfo">–</span></p>
+          </div>
+        </header>
+
+        <div id="setupCard" class="card hidden">
+          <div class="card-h"><h3>İlk kurulum</h3><span class="muted small">Tamamlanınca bu kart gizlenir</span></div>
+          <div class="setup-list" id="setupList"></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="stat-l">Ürün</div><div class="stat-v" id="stTotal">–</div></div>
+          <div class="stat"><div class="stat-l">Etsy'ye yüklenen</div><div class="stat-v" id="stUploaded">–</div></div>
+          <button class="stat stat-btn" id="stReviewBtn"><div class="stat-l">Kontrol bekleyen</div><div class="stat-v" id="stReview">–</div></button>
+          <div class="stat"><div class="stat-l">Bugün kalan</div><div class="stat-v"><span id="stRemaining">–</span><small id="stLimit"></small></div></div>
+          <div class="stat"><div class="stat-l">Toplam harcama</div><div class="stat-v" id="stCost">–</div></div>
+        </div>
+
+        <div class="card mix-card batch-card">
+          <div class="card-h"><div><h3>🔁 Ücretsiz toplu üretim</h3><p class="muted small">Gemini ile art arda birkaç ürün yapar (her biri ~5 dk; ücretsiz). Hepsi vitrini hazır şekilde "Hazır"a düşer, Etsy'ye otomatik yüklenmez — kontrol edip "Toplu yükle" ile gönderirsin. İstediğin an "Durdur".</p></div>
+          <div class="row gap batch-row">
+            <select id="batchMode" class="input">
+              <option value="mix">🔀 Karışık</option>
+              <option value="vintage">🎅 Vintage Noel</option>
+              <option value="everyday">🌿 Günlük / her mevsim</option>
+              <option value="illustration">🖼 Resimli</option>
+              <option value="text">🔤 Yazılı</option>
+            </select>
+            <select id="batchCount" class="input">
+              <option value="2">2 ürün</option><option value="3" selected>3 ürün</option><option value="5">5 ürün</option><option value="8">8 ürün</option><option value="10">10 ürün</option>
+            </select>
+            <button id="btnBatch" class="btn primary big" data-needs-idle>🔁 Toplu üret</button>
+          </div></div>
+        </div>
+
+        <div class="card mix-card">
+          <div class="card-h"><div><h3>🤖 Otomatik ürün (karışık)</h3><p class="muted small">Gemini'yi kendisi açar; her basışta sırayla yazılı → günlük → vintage Noel → günlük → resimli ürün yapar. Konular son ürünlerden farklı seçilir. Sen sadece kontrol edip "Vitrini oluştur" dersin.</p></div>
+          <button id="btnAutoMix" class="btn primary big">🤖 Otomatik ürün yap</button></div>
+        </div>
+
+        <div class="card mix-card vint-card">
+          <div class="card-h"><div><h3>🎅 Vintage Noel (çok satan tarz)</h3><p class="muted small">Gerçekçi, ressam işi eski tarz Noel Baba, ren geyiği, kızak ve karlı kasaba çizimleri. Yazı yok. Gemini'yi kendisi açar, 4 tasarım çizdirir, zemini siler.</p></div>
+          <button id="btnAutoVint" class="btn primary big">🎅 Vintage Noel yap</button></div>
+        </div>
+
+        <div class="card mix-card day-card">
+          <div class="card-h"><div><h3>🌿 Günlük / her mevsim</h3><p class="muted small">Yıl boyu satan, Noel'siz 22 konu: vahşi doğa, dağ-kamp, plaj-sörf, çiçek-arı, kelebek, minimal çizgi, seyahat, sevimli hayvanlar, kedi, köpek, müzik, kitap, hobiler (kamera, bisiklet, satranç, oyun), yemek (ramen, suşi), retro soyut sanat, ay-yıldız, western, kahve ve komik kısa yazılar (Low Battery, 5 More Minutes…).</p></div>
+          <button id="btnAutoDay" class="btn primary big">🌿 Günlük ürün yap</button></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-h"><div><h3>Yeni ürün yap</h3><p class="muted small">Tasarımları Gemini'de çizdir, buraya yapıştır. Tasarım için para ödenmez.</p></div></div>
+            <ol class="steps">
+              <li>Sistem satılabilir bir konu ve 4 talimat verir.</li>
+              <li>Talimatı kopyala, Gemini'ye yapıştır, görseli kopyala.</li>
+              <li>Buraya yapıştır ve "Ürüne çevir" de.</li>
+            </ol>
+            <div class="actions"><button id="btnImport" class="btn primary big">Yeni ürün yap</button><button id="btnAutoText" class="btn ghost big" title="Gemini'yi kendisi açar, 4 YAZILI tasarım çizdirir ve ürüne çevirir.">🤖 Otomatik yazılı</button></div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><div><h3>Resimli PNG yap (yazısız)</h3><p class="muted small">Eski Noel kartı tarzı hayvan ve manzara çizimleri: geyik, tilki, kardinal, kulübe… Yazı yok, yazım hatası riski yok. Ücretsiz.</p></div></div>
+            <ol class="steps">
+              <li>Sistem konu ve 4 farklı sahne talimatı verir (zemin pembe/magenta istenir).</li>
+              <li>Talimatı kopyala, Gemini'ye yapıştır, görseli kopyala.</li>
+              <li>Buraya yapıştır; pembe zemin otomatik silinir, kar ve beyaz detaylar korunur.</li>
+            </ol>
+            <div class="actions"><button id="btnIllu" class="btn primary big">Resimli PNG yap</button><button id="btnAutoIllu" class="btn ghost big" title="Gemini'yi kendisi açar, 4 RESİMLİ (yazısız) tasarım çizdirir ve ürüne çevirir.">🤖 Otomatik resimli</button></div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><div><h3>Otomatik üretim</h3><p class="muted small">Tasarımları yapay zekâ çizer. Replicate kredisi gerekir (ürün başına ~$0.25).</p></div><span class="muted small" id="nextRunInline"></span></div>
+            <div class="actions">
+              <div class="stepper">
+                <button class="sb" data-step="-1">−</button>
+                <input id="countInput" type="number" min="1" max="20" value="1" />
+                <button class="sb" data-step="1">+</button>
+                <span class="muted small">ürün</span>
+              </div>
+              <button id="btnMake" class="btn primary" title="Ürünleri üretir ve kontrol eder; Etsy'ye siz onaylayınca yüklenir">Üret</button>
+              <button id="btnStop" class="btn ghost" disabled>Durdur</button>
+            </div>
+            <details class="det">
+              <summary>Diğer seçenekler</summary>
+              <div class="actions">
+                <button id="btnStart" class="btn ghost" title="Kontrolden geçenler doğrudan Etsy'ye (taslak) yüklenir">Üret ve Etsy'ye yükle</button>
+                <button id="btnDry" class="btn ghost" title="Ücretsiz deneme; Etsy'ye yüklemez">Test üretimi</button>
+                <button id="btnLogin" class="btn ghost">Etsy oturumu</button>
+                <button id="btnOauth" class="btn ghost hidden">Etsy API yetkilendir</button>
+              </div>
+            </details>
+            <div class="progress">
+              <div class="progress-top"><span id="progressLabel">Hazır</span><span id="progressPct" class="mono">0%</span></div>
+              <div class="bar"><div id="progressBar"></div></div>
+              <div id="stepPills" class="pills"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Son ürünler</h3><button class="link" data-goto="products">Tümünü gör</button></div>
+          <div id="recentGrid" class="mini-grid"></div>
+        </div>
+
+        <div class="card term">
+          <div class="card-h">
+            <h3>İşlem kaydı</h3>
+            <div class="row gap">
+              <label class="small muted chk"><input id="autoScroll" type="checkbox" checked /> otomatik kaydır</label>
+              <button id="btnClearLog" class="btn xs ghost">Temizle</button>
+              <button id="btnOpenLogs" class="btn xs ghost">Klasörü aç</button>
+            </div>
+          </div>
+          <div id="logBox" class="log"></div>
+        </div>
+      </section>
+
+      <!-- ================= ÜRÜNLER ================= -->
+      <section id="tab-products" class="tab hidden">
+        <header class="page-h">
+          <div><h1>Ürünler</h1><p class="muted">Bir ürüne tıklayarak görsellerini, kalite raporunu ve SEO metnini inceleyin.</p></div>
+          <div class="row gap">
+            <input id="searchBox" class="input" placeholder="Başlık veya kelime ara…" style="width:240px" />
+            <button id="btnRefresh" class="btn ghost">Yenile</button>
+            <button id="btnBulk" class="btn primary" data-needs-idle title="Birden fazla ürünü seçip sırayla Etsy'ye yükle">Toplu yükle</button>
+          </div>
+        </header>
+        <div id="bulkBar" class="bulk-bar hidden">
+          <span><b id="bulkCount">0 ürün seçildi</b> — yüklemek istediğin ürünlere tıkla (tıklama sırası = yükleme sırası)</span>
+          <div class="row gap">
+            <button id="bulkAll" class="btn ghost xs">Hepsini seç</button>
+            <button id="bulkCancel" class="btn ghost xs">İptal</button>
+            <button id="bulkGo" class="btn primary xs" disabled>Seçilenleri sırayla yükle</button>
+          </div>
+        </div>
+        <div id="groupTabs" class="seg"></div>
+        <div id="statusChips" class="chips"></div>
+        <div id="productGrid" class="p-grid"></div>
+      </section>
+
+      <!-- ================= ZAMANLAYICI ================= -->
+      <section id="tab-schedule" class="tab hidden">
+        <header class="page-h">
+          <div><h1>Zamanlayıcı</h1><p class="muted">Ürünler belirlediğiniz gün ve saatlerde kendiliğinden üretilip Etsy'ye yüklenir. Günlük limit her zaman geçerlidir.</p></div>
+        </header>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-h">
+              <div><h3>Panel zamanlayıcısı</h3><p class="muted small">Panel açıkken (veya saat yanındaki tepsi simgesindeyken) çalışır.</p></div>
+              <div id="schedSwitch" class="switch"></div>
+            </div>
+            <div class="form" id="schedForm"></div>
+            <div class="note" id="schedNext">–</div>
+            <div class="row end gap"><button id="btnSchedSave" class="btn primary">Kaydet</button></div>
+          </div>
+          <div class="card">
+            <div class="card-h">
+              <div><h3>Windows Görev Zamanlayıcı</h3><p class="muted small">Panel kapalıyken bile çalışır. Bilgisayar açık ve oturum açık olmalı; kaçırılan çalışma bilgisayar açılınca yapılır.</p></div>
+              <span id="wtBadge" class="badge">–</span>
+            </div>
+            <div class="form" id="wtForm"></div>
+            <div class="note" id="wtInfo">Durum kontrol ediliyor…</div>
+            <div class="row end gap">
+              <button id="btnWtRemove" class="btn ghost">Kaldır</button>
+              <button id="btnWtRun" class="btn ghost">Şimdi çalıştır</button>
+              <button id="btnWtInstall" class="btn primary">Görevi kur / güncelle</button>
+            </div>
+          </div>
+        </div>
+        <div class="note">
+          <b>İpucu:</b> İkisini birlikte açmanız gerekmez. Bilgisayarınız gün boyu açıksa <b>panel zamanlayıcısı</b> yeterli; paneli kapatmayı seviyorsanız <b>Windows görevi</b>ni kullanın. İkisi aynı anda tetiklenirse ikinci çalışma otomatik atlanır.
+        </div>
+      </section>
+
+      <!-- ================= ETKİNLİK ================= -->
+      <section id="tab-pricing" class="tab hidden">
+        <header class="page-h">
+          <div><h1>Fiyat &amp; İndirim</h1><p class="muted">Fiyatı belirle, satış başına tahmini kârı gör, Etsy'deki ilanlara uygula ve indirim başlat.</p></div>
+        </header>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-h"><h3>Fiyat ve tahmini kâr</h3></div>
+            <div class="form">
+              <div class="f2">
+                <label class="f"><span>Etsy fiyatı (TL, KDV hariç)</span><input id="prPrice" class="input" type="number" step="0.01" min="1" /></label>
+                <label class="f" title="Sadece hesaplama içindir; Etsy'de hiçbir şeyi değiştirmez. Gerçek indirim sağdaki kartla başlatılır."><span>Hesapta indirim varsay (%) <em>— sadece hesap</em></span><input id="prDisc" class="input" type="number" step="1" min="0" max="75" value="0" /></label>
+              </div>
+              <div id="prCalc" class="pr-calc"></div>
+              <div class="f2">
+                <label class="f"><span>Hedef aylık kazanç (TL)</span><input id="prGoal" class="input" type="number" step="100" min="0" value="5000" /></label>
+                <div class="f"><span>Gereken satış</span><div id="prNeed" class="pr-need">–</div></div>
+              </div>
+              <span class="small muted">Tahmindir: Etsy Türkiye ücretleri (işlem %6,5 · ödeme %6,5 + 3 TL · düzenleyici %2,27 · listeleme $0,20) ve bu ücretlere %20 KDV. Gelir vergisi dahil değil. Oranlar config.json → fees altında değiştirilebilir.</span>
+              <div class="actions">
+                <button id="prSave" class="btn ghost">Yeni ürünler için kaydet</button>
+                <button id="prApply" class="btn primary" data-needs-idle>Etsy'deki tüm paket ilanlarına uygula</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><h3>İndirim kampanyası</h3></div>
+            <div class="form">
+              <div class="f2">
+                <label class="f"><span>İndirim (%)</span><input id="saPct" class="input" type="number" step="1" min="5" max="75" value="25" /></label>
+                <label class="f"><span>Süre (gün)</span><input id="saDays" class="input" type="number" step="1" min="1" max="30" value="14" /></label>
+              </div>
+              <div id="saCalc" class="pr-calc"></div>
+              <span class="small muted">Etsy'nin kendi "Run a sale" aracıyla tüm dükkâna uygulanır; ilanlarda üstü çizili fiyat ve "% off" etiketi görünür. Etsy'de aynı anda tek dükkân indirimi olabilir.</span>
+              <div class="actions"><button id="saStart" class="btn primary" data-needs-idle>Etsy'de indirimi başlat</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-activity" class="tab hidden">
+        <header class="page-h">
+          <div><h1>Kayıtlar</h1><p class="muted">Panelden ve Windows görevinden yapılan tüm çalışmalar.</p></div>
+          <div class="row gap">
+            <select id="actFilter" class="input" style="width:170px">
+              <option value="">Tüm kayıtlar</option><option value="success">Başarılı</option><option value="warn">Uyarı</option><option value="error">Hata</option>
+            </select>
+            <button id="btnActRefresh" class="btn ghost">Yenile</button>
+          </div>
+        </header>
+        <div class="card"><div id="actList" class="log tall"></div></div>
+      </section>
+
+      <!-- ================= AYARLAR ================= -->
+      <section id="tab-settings" class="tab hidden">
+        <header class="page-h">
+          <div><h1>Ayarlar</h1><p class="muted">Değişiklikler bir sonraki üretimden itibaren geçerlidir.</p></div>
+          <div class="row gap"><button type="button" id="btnReloadSettings" class="btn ghost">Geri al</button><button id="btnSaveSettings" class="btn primary">Kaydet</button></div>
+        </header>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-h"><h3>API anahtarları</h3><label class="small muted chk"><input id="showKeys" type="checkbox" /> göster</label></div>
+            <div class="form">
+              <label class="f"><span>Replicate API Token <em>(zorunlu)</em></span><input class="input" type="password" data-env="REPLICATE_API_TOKEN" placeholder="r8_..." /></label>
+              <label class="f"><span>OpenAI API Key <em>(isteğe bağlı)</em></span><input class="input" type="password" data-env="OPENAI_API_KEY" placeholder="sk-..." /></label>
+              <div class="f2">
+                <label class="f"><span>Etsy API Keystring <em>(API modu)</em></span><input class="input" type="password" data-env="ETSY_API_KEY" /></label>
+                <label class="f"><span>Etsy Shared Secret</span><input class="input" type="password" data-env="ETSY_SHARED_SECRET" /></label>
+              </div>
+              <details class="det">
+                <summary>Bulut depolama (isteğe bağlı — 19 MB üstü paketler)</summary>
+                <div class="f2">
+                  <label class="f"><span>Endpoint</span><input class="input" data-env="CLOUD_ENDPOINT" placeholder="https://&lt;id&gt;.r2.cloudflarestorage.com" /></label>
+                  <label class="f"><span>Region</span><input class="input" data-env="CLOUD_REGION" placeholder="auto" /></label>
+                  <label class="f"><span>Bucket</span><input class="input" data-env="CLOUD_BUCKET" /></label>
+                  <label class="f"><span>Public Base URL</span><input class="input" data-env="CLOUD_PUBLIC_BASE_URL" /></label>
+                  <label class="f"><span>Access Key ID</span><input class="input" type="password" data-env="CLOUD_ACCESS_KEY_ID" /></label>
+                  <label class="f"><span>Secret Access Key</span><input class="input" type="password" data-env="CLOUD_SECRET_ACCESS_KEY" /></label>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><h3>Mağaza ve üretim</h3></div>
+            <div class="form">
+              <div class="f3">
+                <label class="f"><span>Satış fiyatı (TL)</span><input class="input" type="number" step="0.01" min="1" data-cfg="price" data-type="number" /></label>
+                <label class="f"><span>Günlük limit</span><input class="input" type="number" min="1" max="50" data-cfg="daily_limit" data-type="number" /></label>
+                <label class="f"><span>Paket boyutu</span><select class="input" data-cfg="bundle_size" data-type="number"><option value="1">Tekil tasarım</option><option value="4">4'lü paket</option></select></label>
+              </div>
+              <label class="f"><span>Özel niş kelimesi <em>(boş = otomatik trend)</em></span><input class="input" data-cfg="custom_niche" placeholder="ör. western christmas, dog mom" /></label>
+              <div class="f2">
+                <label class="f"><span>Tasarım modeli</span><select class="input" data-cfg="replicate_model">
+                  <option value="recraft-ai/recraft-v3">Recraft V3 — yazılar kusursuz (önerilen)</option>
+                  <option value="black-forest-labs/flux-schnell">Flux Schnell — ucuz, yazısız</option></select></label>
+                <label class="f"><span>Arka plan silme</span><select class="input" data-cfg="bg_removal">
+                  <option value="replicate">Replicate (bria) — en temiz</option><option value="local">Yerleşik — ücretsiz</option><option value="rembg">Yerel rembg</option></select></label>
+                <label class="f"><span>Yükleme modu</span><select class="input" data-cfg="publish_mode">
+                  <option value="playwright">Tarayıcı otomasyonu</option><option value="api">Etsy resmi API v3</option></select></label>
+                <label class="f"><span>Tarayıcı</span><select class="input" data-cfg="browser_channel">
+                  <option value="msedge">Microsoft Edge</option><option value="chrome">Google Chrome</option><option value="">Playwright Chromium</option></select></label>
+              </div>
+              <div class="sw-row"><div><b>Onaylı mod</b><p>Açık = hiçbir ürün (planlı üretim dahil) siz "Etsy'ye yükle" demeden yüklenmez</p></div><div class="switch" data-cfg-switch="require_approval"></div></div>
+              <div class="sw-row"><div><b>Direkt yayınla</b><p>Kapalı = Etsy'ye taslak olarak kaydeder (önerilen)</p></div><div class="switch" data-cfg-switch="auto_publish"></div></div>
+              <div class="sw-row"><div><b>AI kullanım beyanı</b><p>Etsy kuralı: AI ile üretilen içerik beyan edilmeli</p></div><div class="switch" data-cfg-switch="ai_disclosure"></div></div>
+            </div>
+          </div>
+
+          <div class="card span-2">
+            <div class="card-h"><div><h3>Kalite ve Etsy kuralları</h3><p class="muted small">Ban riskini azaltmak için her ürün yüklenmeden önce denetlenir.</p></div></div>
+            <div class="form f2">
+              <div class="sw-row"><div><b>Kalite kontrol</b><p>Teknik + metin + marka/telif denetimi</p></div><div class="switch" data-cfg-switch="qc_enabled"></div></div>
+              <div class="sw-row"><div><b>Yapay zekâ görsel denetimi</b><p>Yazım hatası, tişört çizimi, logo, ünlü, uygunsuz içerik (~$0.002/kontrol)</p></div><div class="switch" data-cfg-switch="qc_vision"></div></div>
+              <div class="sw-row"><div><b>Sorunlu ürünü yükleme</b><p>Kontrolden geçemeyen ürün "İnceleme"de bekler</p></div><div class="switch" data-cfg-switch="qc_block_on_fail"></div></div>
+              <div class="sw-row"><div><b>Hatalı tasarımı paketten çıkar</b><p>Yeniden denemeler de başarısızsa</p></div><div class="switch" data-cfg-switch="qc_drop_failed"></div></div>
+              <label class="f"><span>Hatalı tasarım için yeniden üretme hakkı</span><select class="input" data-cfg="qc_max_regenerate" data-type="number"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+              <div class="sw-row"><div><b>Kapatınca tepside çalış</b><p>Zamanlayıcı açıksa pencere kapansa da devam eder</p></div><div class="switch" data-cfg-switch="close_to_tray"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== Ürün detayı ===== -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-h">
+        <div class="modal-title"><span id="mStatus" class="badge"></span><h2 id="mTitle">–</h2></div>
+        <button class="btn xs ghost" id="mClose">✕</button>
+      </div>
+      <div class="modal-body" id="mBody"></div>
+      <div class="modal-f" id="mFoot"></div>
+    </div>
+  </div>
+
+  <!-- ===== Kendi tasarımlarından ürün ===== -->
+  <div id="impModal" class="modal hidden">
+    <div class="modal-box imp-box">
+      <div class="modal-h">
+        <div class="modal-title"><h2 id="impTitle">Yeni ürün yap</h2></div>
+        <button class="btn xs ghost" id="impClose">✕</button>
+      </div>
+      <div class="modal-body imp-body">
+        <div class="sec">
+          <h4>1 · Konu (İngilizce)</h4>
+          <div class="imp-kwrow"><input id="impKw" type="text" placeholder="Konu bulunuyor…" /><button id="impSuggest" class="btn ghost" title="Sistem satılabilir yeni bir konu bulsun">Başka konu</button></div>
+          <span class="small muted" id="impKwInfo">Konuyu sistem bulur; istersen değiştirebilirsin. Etsy başlığı, etiketler ve kapak bu konudan yazılır.</span>
+          <h4>2 · Gemini'de çizdir</h4>
+          <span class="small muted">Talimatı kopyala → Gemini'de <b>yeni sohbet</b> aç ve yapıştır → çıkan görselde sağ tık → Görseli kopyala. Her talimat için yeni sohbet açarsan tasarımlar birbirine benzemez.</span>
+          <div id="impPrompts" class="imp-prompts"></div>
+        </div>
+        <div class="sec">
+          <h4>3 · Görselleri ekle (en fazla 5)</h4>
+          <div class="imp-kwrow"><button id="impPaste" class="btn primary" title="Gemini'de görsele sağ tık → Görseli kopyala, sonra buna bas (veya Ctrl+V)">Yapıştır (Ctrl+V)</button><button id="impPick" class="btn ghost">Dosyadan seç…</button></div>
+          <span class="small muted">En iyi kalite için Gemini'de "İndir" deyip "Dosyadan seç" de kullanabilirsin.</span>
+          <div id="impFiles" class="gal designs imp-files"></div>
+          <ul class="small muted imp-tips" id="impTips">
+            <li>Arka plan düz beyaz olmalı; tişört/kâğıt/çerçeve çizilmiş görselleri seçme.</li>
+            <li>Yazılarda harf hatası olmamalı.</li>
+            <li>Marka, ünlü, çizgi film karakteri olmamalı (Etsy kapatır).</li>
+          </ul>
+          <span class="small muted">Ücretsiz. Replicate kredisi varsa arka plan silme ve yazım kontrolü yapay zekâ ile yapılır (~$0.02/görsel).</span>
+        </div>
+      </div>
+      <div class="modal-f"><button id="impGo" class="btn primary" disabled>Ürüne çevir</button></div>
+    </div>
+  </div>
+  <div id="lightbox" class="lightbox hidden"><div id="lbBar" class="lb-bar hidden"><span id="lbHint">Beyaz kalan yere tıkla → silinir. Çok yer varsa <b>Ctrl</b> basılı tutup hepsine tıkla, Ctrl'yi bırakınca hepsi birden silinir.</span><button id="lbRun" class="btn xs primary hidden">Seçilenleri sil</button><button id="lbClear" class="btn xs ghost hidden">Seçimi temizle</button><button id="lbUndo" class="btn xs ghost">↶ Geri al</button><button id="lbReset" class="btn xs ghost">İlk hâline döndür</button><button id="lbDone" class="btn xs">Bitti</button></div><div id="lbWrap" class="lb-wrap"><img id="lbImg" alt="" /><div id="lbMarks"></div></div></div>
+  <div id="toast" class="toast hidden"></div>
+  <script src="renderer.js"></script>
+</body>
+</html>

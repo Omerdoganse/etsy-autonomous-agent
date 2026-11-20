@@ -1,0 +1,73 @@
+{
+  "shop_name": "Your Shop",
+  "price": 40,
+  "quantity": 999,
+  "currency": "TRY",
+  "daily_limit": 20,
+  "default_count": 5,
+  "publish_mode": "playwright",
+  "auto_publish": false,
+  "custom_niche": "",
+  "bundle_size": 4,
+  "lookahead_days": 60,
+  "min_lead_days": 7,
+  "image_provider": "replicate",
+  "replicate_model": "recraft-ai/recraft-v3",
+  "openai_image_model": "gpt-image-1",
+  "openai_text_model": "gpt-4.1-mini",
+  "bg_removal": "replicate",
+  "replicate_bg_model": "bria/remove-background",
+  "ai_upscale": false,
+  "output_width": 4500,
+  "output_height": 5400,
+  "dpi": 300,
+  "zip_limit_mb": 19,
+  "large_file_strategy": "cloud",
+  "ai_disclosure": true,
+  "browser_channel": "msedge",
+  "headless_publish": false,
+  "etsy_category_query": "clip art",
+  "etsy_taxonomy_id": null,
+  "check_competition": false,
+  "costs": {
+    "replicate_flux_schnell": 0.003,
+    "replicate_recraft_v3": 0.04,
+    "replicate_bg_removal": 0.018,
+    "replicate_upscale": 0.004,
+    "openai_image": 0.06,
+    "openai_text": 0.002,
+    "etsy_listing_fee": 0.2
+  },
+  "windows_task": {
+    "times": [
+      "10:00"
+    ],
+    "days": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      0
+    ],
+    "count": 3
+  },
+  "require_approval": true,
+  "schedule": {
+    "enabled": true,
+    "times": [
+      "10:00"
+    ],
+    "days": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      0
+    ],
+    "count": 3
+  }
+}

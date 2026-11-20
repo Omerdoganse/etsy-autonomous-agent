@@ -1,0 +1,21 @@
+# Bağımlılıklar
+node_modules/
+
+# Sırlar ve kişisel ayarlar (asla yüklenmez)
+.env
+config.json
+data/
+output/
+logs/
+*.sqlite*
+*.local.js
+
+# Büyük / üretilmiş dosyalar
+tools/
+*.zip
+*.mp4
+*.mov
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db

@@ -1,0 +1,35 @@
+{
+  "name": "etsy-autonomous-agent",
+  "version": "1.0.0",
+  "description": "Etsy Otonom Dijital Urun Fabrikasi + Masaustu Kontrol Paneli",
+  "main": "gui/main.js",
+  "private": true,
+  "scripts": {
+    "gui": "electron .",
+    "setup": "node src/setup_mockups.js",
+    "dry-run": "node src/index.js --dry-run",
+    "start": "node src/index.js --count=5",
+    "login": "node src/05_etsy_publisher.js --login",
+    "auth": "node src/05_etsy_publisher.js --oauth"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^1.12.0",
+    "dotenv": "^16.4.5",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "form-data": "^4.0.0",
+    "pdf-lib": "^1.17.1",
+    "playwright": "^1.50.0",
+    "sharp": "^0.34.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^12.0.0"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0"
+  }
+}
