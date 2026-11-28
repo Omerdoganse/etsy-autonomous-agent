@@ -703,6 +703,25 @@ async function runBsSets(r, wrap = (_n, fn) => fn()) {
   return made;
 }
 
+/** Temalı büyük paketler (bkz. lib/theme_bundle.js): hazırla → Drive'a yükle; ya da elle paylaşılanları "Hazır" yap */
+async function runBundles(r, wrap = (_n, fn) => fn()) {
+  const tb = require('./lib/theme_bundle');
+  for (const id of r.shared || []) { try { tb.markShared(id); } catch (e) { logError(`Paket paylaşım işareti ${id}`, e); } }
+  const made = [];
+  for (const key of r.build || []) {
+    try {
+      const { id } = await wrap('import', () => tb.prepare(key));
+      try { await wrap('import', () => require('./lib/mega_bundle').driveUpload(id)); } catch (e) { logError(`Paket Drive yüklemesi ${id}`, e); }
+      made.push(id);
+    } catch (e) { logError(`Paket ${key}`, e); }
+  }
+  if (made.length) {
+    let prev = []; try { prev = JSON.parse(fs.readFileSync(path.join(PATHS.data, 'bundle_done.json'), 'utf8')).made || []; } catch { /* yok */ }
+    fs.writeFileSync(path.join(PATHS.data, 'bundle_done.json'), JSON.stringify({ at: new Date().toISOString(), made, previous: prev }, null, 2));
+  }
+  return made;
+}
+
 /** Panel kapalıyken bırakılan istekleri zamanlanmış (Windows görevi) çalıştırmada işler: önce yükleme, sonra çok satan setleri. */
 async function runPendingFromCli() {
   const f = path.join(PATHS.data, 'publish_request.txt');
@@ -717,6 +736,12 @@ async function runPendingFromCli() {
     const r = JSON.parse(fs.readFileSync(fbs, 'utf8'));
     fs.unlinkSync(fbs);
     await runBsSets(r);
+  }
+  const fbd = path.join(PATHS.data, 'bundle_request.json');
+  if (fs.existsSync(fbd)) {
+    const r = JSON.parse(fs.readFileSync(fbd, 'utf8'));
+    fs.unlinkSync(fbd);
+    await runBundles(r);
   }
 }
 
@@ -971,6 +996,13 @@ function startIpcWorker() {
             try { await job('import', () => importProduct({ files, keyword: r.keyword, mode: r.mode || 'text', designs: r.designs || null, gen: r.gen || null })); } catch (e) { logError('Uzaktan içe aktarma', e); }
           }
         })();
+      }
+      // data/bundle_request.json: { build:["family",…] } → temalı büyük paket (+ Drive); { shared:[id] } → Drive paylaşıldı → Hazır
+      const fbd = path.join(PATHS.data, 'bundle_request.json');
+      if (fs.existsSync(fbd) && !busy && !publishLoop && !fs.existsSync(path.join(PATHS.data, 'publish_request.txt'))) {
+        const r = JSON.parse(fs.readFileSync(fbd, 'utf8'));
+        fs.unlinkSync(fbd);
+        runBundles(r, job).catch((e) => logError('Temalı paketler', e));
       }
       // data/bs_request.json: { sets:["mama_patchwork",…] } → çok satan kalıplı özgün setler (Gemini → ürün → vitrin; yayınlanmaz)
       const fbs = path.join(PATHS.data, 'bs_request.json');

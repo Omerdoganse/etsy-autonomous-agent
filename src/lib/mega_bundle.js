@@ -181,7 +181,8 @@ async function driveUpload(id) {
   const dir = p.folder;
   const zips = fs.readdirSync(path.join(dir, 'zips')).filter((f) => /\.zip$/.test(f)).sort().map((f) => path.join(dir, 'zips', f));
   const SHOP = loadConfig().shop_name || 'Shop';
-  const folderName = `${SHOP} - ${JSON.parse(fs.readFileSync(path.join(dir, 'trend.json'), 'utf8')).total} Christmas PNG Mega Bundle`;
+  const tr = JSON.parse(fs.readFileSync(path.join(dir, 'trend.json'), 'utf8'));
+  const folderName = `${SHOP} - ${tr.drive_title || `${tr.total} Christmas PNG Mega Bundle`}`;
   const { chromium } = require('playwright');
   const cfg = loadConfig();
   const sess = path.join(PATHS.data, 'gemini_session');

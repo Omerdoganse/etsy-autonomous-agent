@@ -72,9 +72,33 @@ async function grabLastImage(page) {
   return Buffer.from(dataUrl.split(',')[1], 'base64');
 }
 
+/** Gemini'nin açtığı tanıtım/bilgi pencerelerini kapatır (koşul kabul etmez; sadece kapat/anladım/şimdi değil). */
+async function dismissOverlays(page) {
+  for (let k = 0; k < 3; k++) {
+    const back = await page.locator('.cdk-overlay-backdrop-showing, [role="dialog"]:visible').count().catch(() => 0);
+    if (!back) return;
+    const btn = page.locator('.cdk-overlay-container button:visible, [role="dialog"] button:visible')
+      .filter({ hasText: /^(\s*)(close|kapat|got it|anladım|not now|şimdi değil|daha sonra|later|no thanks|hayır, teşekkürler|dismiss|skip|atla)(\s*)$/i }).first();
+    if (await btn.count().catch(() => 0)) await btn.click({ timeout: 3000 }).catch(() => {});
+    else {
+      const x = page.locator('.cdk-overlay-container button[aria-label*="close" i]:visible, .cdk-overlay-container button[aria-label*="kapat" i]:visible').first();
+      if (await x.count().catch(() => 0)) await x.click({ timeout: 3000 }).catch(() => {});
+      else await page.keyboard.press('Escape').catch(() => {});
+    }
+    await page.waitForTimeout(800);
+  }
+}
+
 async function send(page, text) {
   const ed = page.locator(EDITOR).first();
-  await ed.click();
+  await dismissOverlays(page);
+  try { await ed.click({ timeout: 10000 }); } catch (e) {
+    // Hâlâ bir katman tıklamayı engelliyorsa: kaydet, kapatmayı tekrar dene, olmazsa editöre doğrudan odaklan
+    await page.screenshot({ path: require('path').join(PATHS.logs, 'gemini_overlay.png') }).catch(() => {});
+    await dismissOverlays(page);
+    await ed.evaluate((el) => el.focus()).catch(() => {});
+    log('Gemini: istem kutusu bir pencere tarafından örtülüyordu; kapatıldı/odaklandı', 'warn');
+  }
   await page.keyboard.insertText(text.replace(/\s*\n+\s*/g, ' '));
   await page.waitForTimeout(600);
   await page.keyboard.press('Enter');
