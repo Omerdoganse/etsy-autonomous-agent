@@ -752,6 +752,8 @@ function applyLockedSeo(id, seo) {
     const f = path.join(dir, 'seo_metadata.json');
     const m = JSON.parse(fs.readFileSync(f, 'utf8'));
     const oldTitle = m.title;
+    // Etsy en fazla 3 tamamı büyük harf kelimeye izin verir; elle yazılan başlık da aynı kuraldan geçer
+    seo = { ...seo, title: require('./04_seo_engine').validateTitle(seo.title) };
     m.title = seo.title; m.tags = seo.tags;
     if (m.description && oldTitle) m.description = String(m.description).split(oldTitle).join(seo.title);
     fs.writeFileSync(f, JSON.stringify(m, null, 2));
